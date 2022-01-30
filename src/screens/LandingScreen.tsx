@@ -1,8 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import type { FC } from "react";
 import React, { useState, useEffect } from "react";
 import { View, Text, StyleSheet, Image, Dimensions } from "react-native";
 import * as Location from "expo-location";
+import { connect } from "react-redux";
 
+import type { ApplicationState, UserState } from "../redux";
+import { onUpdateLocation } from "../redux";
 import type {
   Routes,
   NativeStackNavigationProps,
@@ -52,7 +56,13 @@ const styles = StyleSheet.create({
 
 type Props = NativeStackNavigationProps<Routes, "Landing">;
 
-export const LandingScreen = ({ navigation }: Props) => {
+interface LandingProps {
+  userReducer: UserState;
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  onUpdateLocation: Function;
+}
+
+export const LandingScreen: FC<LandingProps> = ({ navigation }: Props) => {
   const [errorMsg, setErrorMsg] = useState("");
   const [address, setAddress] = useState<Location.LocationGeocodedLocation>();
   const [displayAddress, setDisplayAddress] = useState("");
@@ -83,8 +93,8 @@ export const LandingScreen = ({ navigation }: Props) => {
         // console.log(addressResponse);
 
         for (const item of addressResponse) {
-          setAddress(item);
-          console.log(item);
+          // setAddress(item);
+          onUpdateLocation(item);
           const currentAddress = `${item.region}, ${item.city}, ${item.country}`;
           setDisplayAddress(currentAddress);
 
@@ -118,3 +128,7 @@ export const LandingScreen = ({ navigation }: Props) => {
     </View>
   );
 };
+
+const mapStateToProps = (state: ApplicationState) => ({
+  userReducer: state.userReducer,
+});
