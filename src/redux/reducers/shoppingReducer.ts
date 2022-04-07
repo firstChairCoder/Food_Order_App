@@ -5,7 +5,7 @@ const initialState = {
   availability: {} as FoodAvailability,
 };
 
-const shoppingReducer = (
+export const shoppingReducer = (
   state: ShoppingState = initialState,
   action: ShoppingAction
 ) => {
@@ -20,5 +20,3 @@ const shoppingReducer = (
       return state;
   }
 };
-
-export { shoppingReducer };

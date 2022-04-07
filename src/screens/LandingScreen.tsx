@@ -1,16 +1,17 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-shadow */
 import type { FC } from "react";
 import React, { useState, useEffect } from "react";
 import { View, Text, StyleSheet, Image, Dimensions } from "react-native";
 import * as Location from "expo-location";
 import { connect } from "react-redux";
+import { useNavigation } from "@react-navigation/native";
 
 import type { ApplicationState, UserState } from "../redux";
 import { onUpdateLocation } from "../redux";
-import type {
-  Routes,
-  NativeStackNavigationProps,
-} from "../components/Navigation";
+// import type {
+//   Routes,
+//   NativeStackNavigationProps,
+// } from "../components/Navigation";
 
 const { width } = Dimensions.get("screen");
 
@@ -54,20 +55,23 @@ const styles = StyleSheet.create({
   },
 });
 
-type Props = NativeStackNavigationProps<Routes, "Landing">;
+// type Props = NativeStackNavigationProps<Routes, "Landing">;
 
 interface LandingProps {
   userReducer: UserState;
   // eslint-disable-next-line @typescript-eslint/ban-types
   onUpdateLocation: Function;
+  //   // navigation: NativeStackNavigationProps<Routes, "Landing">;
 }
 
-export const LandingScreen: FC<LandingProps> = ({ navigation }: Props) => {
+const _LandingScreen: FC<LandingProps> = (props) => {
+  const navigation = useNavigation();
+
+  const { onUpdateLocation, userReducer } = props;
+
   const [errorMsg, setErrorMsg] = useState("");
   const [address, setAddress] = useState<Location.LocationGeocodedLocation>();
   const [displayAddress, setDisplayAddress] = useState("");
-
-  // const { navigation } = useNavigation();
 
   useEffect(() => {
     (async () => {
@@ -93,7 +97,7 @@ export const LandingScreen: FC<LandingProps> = ({ navigation }: Props) => {
         // console.log(addressResponse);
 
         for (const item of addressResponse) {
-          // setAddress(item);
+          setAddress(item);
           onUpdateLocation(item);
           const currentAddress = `${item.region}, ${item.city}, ${item.country}`;
           setDisplayAddress(currentAddress);
@@ -132,3 +136,9 @@ export const LandingScreen: FC<LandingProps> = ({ navigation }: Props) => {
 const mapStateToProps = (state: ApplicationState) => ({
   userReducer: state.userReducer,
 });
+
+const LandingScreen = connect(mapStateToProps, { onUpdateLocation })(
+  _LandingScreen
+);
+
+export { LandingScreen };

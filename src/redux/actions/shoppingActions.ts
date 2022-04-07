@@ -1,7 +1,5 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import axios from "axios";
 import type { Dispatch } from "react";
-import type { LocationGeocodedAddress } from "expo-location";
 
 import { BASE_URL } from "../../utils";
 import type { FoodAvailability } from "../models";
@@ -18,12 +16,14 @@ export interface ShoppingErrorAction {
 
 export type ShoppingAction = AvailabilityAction | ShoppingErrorAction;
 
-export const onAvailability = () => {
+export const onAvailability = (postcode: string) => {
+  //console.log(`postal code, $(postcode)`)
   return async (dispatch: Dispatch<ShoppingAction>) => {
     try {
-      const response = await axios.get(
-        `${BASE_URL}/food/availability/78787878`
+      const response = await axios.get<FoodAvailability>(
+        `${BASE_URL}/food/availability/${postcode}`
       );
+      //console.log(response)
       if (response) {
         dispatch({
           type: "ON_AVAILABILITY",
