@@ -6,6 +6,7 @@
       "arrow-body-style": "off",
       "react-hooks/exhaustive-deps": "off",
       "prefer-arrow-callback": "off",
+      "@typescript-eslint/no-explicit-any": "off",
       "prettier/prettier": [
         "error",
         {
