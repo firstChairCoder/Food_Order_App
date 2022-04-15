@@ -1,28 +1,31 @@
+/* eslint-disable @typescript-eslint/ban-types */
 import type { FC } from "react";
 import React, { useEffect } from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, FlatList, ScrollView } from "react-native";
 import { connect } from "react-redux";
+import { useNavigation } from "@react-navigation/native";
 
-import {
-  onUpdateLocation,
-  onAvailability,
-  // Restaurant,
-  // FoodModel,
-} from "../redux";
+import { onAvailability, onSearchFoods } from "../redux";
 import type {
   UserState,
   ApplicationState,
   ShoppingState,
-  // Restaurant,
-  // FoodModel,
+  Restaurant,
+  FoodModel,
 } from "../redux";
+import {
+  CategoryCard,
+  IconBtn,
+  RestaurantCard,
+  SearchBar,
+} from "../components";
 
 const styles = StyleSheet.create({
-  // body: {
-  //   flex: 10,
-  //   justifyContent: "center",
-  //   alignItems: "center",
-  // },
+  body: {
+    flex: 10,
+    justifyContent: "center",
+    alignItems: "center",
+  },
   container: {
     flex: 1,
     backgroundColor: "#FFF",
@@ -39,35 +42,44 @@ const styles = StyleSheet.create({
   navigation: {
     flex: 2,
   },
+  title: {
+    fontSize: 25,
+    fontWeight: "700",
+    color: "#F15B5D",
+    marginLeft: 20,
+  },
 });
 
 interface HomeProps {
   userReducer: UserState;
   shoppingReducer: ShoppingState;
-  // eslint-disable-next-line @typescript-eslint/ban-types
   onAvailability: Function;
+  onSearchFoods: Function;
 }
 
 export const _HomeScreen: FC<HomeProps> = (props) => {
   const { location } = props.userReducer;
   const { availability } = props.shoppingReducer;
 
-  // const { categories, foods } = availability;
+  const navigation = useNavigation();
 
-  // useEffect(() => {
-  //   props.onAvailability(location.postalCode);
-  //   // setTimeout(() => {
-  //   //   props.onSearchFoods(location.postalCode);
-  //   // }, 1000);
-  // }, []);
+  const { categories, foods, restaurants } = availability;
 
-  // const onTapRestaurant = (item: Restaurant) => {
-  //   navigate("RestaurantPage", { restaurant: item });
-  // };
+  useEffect(() => {
+    props.onAvailability(location.postalCode);
+    //for deeper search screen API call
+    setTimeout(() => {
+      props.onSearchFoods(location.postalCode);
+    }, 1000);
+  }, []);
 
-  // const onTapFood = (item: FoodModel) => {
-  //   navigate("FoodDetailPage", { food: item });
-  // };
+  const onPressRestaurant = (item: Restaurant) => {
+    navigation.navigate("Restaurant", { restaurant: item });
+  };
+
+  const onPressFood = (item: FoodModel) => {
+    navigation.navigate("FoodDetails", { food: item });
+  };
 
   return (
     <View style={styles.container}>
@@ -85,84 +97,67 @@ export const _HomeScreen: FC<HomeProps> = (props) => {
             marginLeft: 4,
           }}
         >
-          {/* <SearchBar
+          <SearchBar
             didTouch={() => {
-              navigate("SearchPage");
+              navigation.navigate("SearchPage");
             }}
             onTextChange={() => {}}
           />
-          <ButtonWithIcon
-            onTap={() => {}}
-            icon={require("../images/hambar.png")}
+          <IconBtn
+            onPress={() => {}}
+            icon={require("../../assets/images/hambar.png")}
             width={50}
             height={40}
-          /> */}
+          />
         </View>
       </View>
 
-      {/* <View style={styles.body}>
+      <View style={styles.body}>
         <ScrollView>
           <FlatList
             horizontal
             showsHorizontalScrollIndicator={false}
             data={categories}
+            keyExtractor={(item) => `${item.id}`}
             renderItem={({ item }) => (
               <CategoryCard
                 item={item}
-                onTap={() => {
-                  alert("Category tapped");
+                onPress={() => {
+                  console.warn("Category tapped");
                 }}
               />
             )}
-            keyExtractor={(item) => `${item.id}`}
           />
+
+          {/* Top Restaurants */}
           <View>
-            <Text
-              style={{
-                fontSize: 25,
-                fontWeight: "600",
-                color: "#f15b5d",
-                marginLeft: 20,
-              }}
-            >
-              {" "}
-              Top Restaurants
-            </Text>
+            <Text style={styles.title}>Top Restaurants</Text>
           </View>
           <FlatList
             horizontal
             showsHorizontalScrollIndicator={false}
             data={restaurants}
-            renderItem={({ item }) => (
-              <RestaurantCard item={item} onTap={onTapRestaurant} />
-            )}
             keyExtractor={(item) => `${item._id}`}
+            renderItem={({ item }) => (
+              <RestaurantCard item={item} onPress={onPressRestaurant} />
+            )}
           />
 
+          {/* 30 Minutes or less */}
           <View>
-            <Text
-              style={{
-                fontSize: 25,
-                fontWeight: "600",
-                color: "#f15b5d",
-                marginLeft: 20,
-              }}
-            >
-              {" "}
-              30 Minutes Foods
-            </Text>
+            <Text style={styles.title}>30 Minutes or Less</Text>
           </View>
           <FlatList
             horizontal
             showsHorizontalScrollIndicator={false}
             data={foods}
-            renderItem={({ item }) => (
-              <RestaurantCard item={item} onTap={onTapFood} />
-            )}
             keyExtractor={(item) => `${item._id}`}
+            renderItem={({ item }) => (
+              <RestaurantCard item={item} onPress={onPressFood} />
+            )}
           />
         </ScrollView>
-      </View> */}
+      </View>
     </View>
   );
 };
@@ -172,6 +167,8 @@ const mapToStateProps = (state: ApplicationState) => ({
   shoppingReducer: state.shoppingReducer,
 });
 
-const HomeScreen = connect(mapToStateProps, { onAvailability })(_HomeScreen);
+const HomeScreen = connect(mapToStateProps, { onAvailability, onSearchFoods })(
+  _HomeScreen
+);
 
 export { HomeScreen };
